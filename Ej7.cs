@@ -1,7 +1,5 @@
 // using System;
 // using System.Collections.Generic;
-// using System.Globalization;
-// using System.Security.Cryptography.X509Certificates;
 
 // namespace Test{
 //     class Ej7{
