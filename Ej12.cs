@@ -1,17 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Formats.Asn1;
+using System.Security.Cryptography.X509Certificates;
 
 /*Hacer una clase llamada Persona que siga las siguientes condiciones:
 
-● Sus atributos son: nombre, edad, DNI, sexo (H hombre, M mujer), peso y altura. No
+● Sus atributos son: nombre, Edad, Dni, Sexo (H hombre, M mujer), peso y altura. No
 queremos que se accedan directamente a ellos. Pensa que modificador de acceso es el
 más adecuado, también su tipo. Si queres añadir algún atributo podes hacerlo.
-● Por defecto, todos los atributos menos el DNI serán valores por defecto según su tipo (0
+● Por defecto, todos los atributos menos el Dni serán valores por defecto según su tipo (0
 números, cadena vacía para String, etc.). Sexo sera hombre por defecto, usa una
 constante para ello.
 ● Se implantaran varios constructores:
 ○ Un constructor por defecto.
-○ Un constructor con el nombre, edad y sexo, el resto por defecto.
+○ Un constructor con el nombre, Edad y Sexo, el resto por defecto.
 ○ Un constructor con todos los atributos como parámetro.
 ● Los métodos que se implementarán son:
 ○ calcularIMC(): calculará si la persona está en su peso ideal (peso en
@@ -20,26 +23,21 @@ devuelve un -1, si devuelve un número entre 20 y 25 (incluidos), significa que
 está por debajo de su peso ideal la función devuelve un 0 y si devuelve un valor
 mayor que 25 significa que tiene sobrepeso, la función devuelve un 1. Te
 recomiendo que uses constantes para devolver estos valores.
-■ esMayorDeEdad(): indica si es mayor de edad, devuelve un booleano.
-■ comprobarSexo(char sexo): comprueba que el sexo introducido es
+■ esMayorDeEdad(): indica si es mayor de Edad, devuelve un booleano.
+■ comprobarSexo(char Sexo): comprueba que el Sexo introducido es
 correcto. Si no es correcto, será H. No será visible al exterior.
-■ generaDNI(): genera un número aleatorio de 8 cifras, genera a partir de
+■ generaDni(): genera un número aleatorio de 8 cifras, genera a partir de
 este su número su letra correspondiente. Este método será invocado
 cuando se construya el objeto. Podes dividir el método para que te sea
-más fácil. No será visible al exterior ejemplo de DNI(12345678D).
-■ Set de cada parámetro, excepto de DNI.
+más fácil. No será visible al exterior ejemplo de Dni(12345678D).
+■ Set de cada parámetro, excepto de Dni.
 
 Ahora, la clase MAIN debe hacer lo siguiente:
 
-● Pedir por consola el nombre, la edad, sexo, peso y altura.
-● Crear 3 objetos de la clase anterior, el primer objeto obtendrá las anteriores variables
-pedidas por teclado, el segundo objeto obtendrá todos los anteriores menos el peso y la
-altura y el último por defecto, para este último utiliza los métodos set para darle a los
-atributos un valor.
-
-● Para cada objeto, deberá comprobar si está en su peso ideal, tiene sobrepeso o por
-debajo de su peso ideal con un mensaje.
-● Indicar para cada objeto si es mayor de edad.
+● Pedir por consola el nombre, la Edad, Sexo, peso y altura.
+● Crear 3 objetos de la clase anterior el primer objeto obtendrá las anteriores variables pedidas por teclado, el segundo objeto obtendrá todos los anteriores menos el peso y la altura y el último por defecto, para este último utiliza los métodos set para darle a los atributos un valor.
+● Para cada objeto, deberá comprobar si está en su peso ideal, tiene sobrepeso o pordebajo de su peso ideal con un mensaje.
+● Indicar para cada objeto si es mayor de Edad.
 ● Por último, mostrar la información de cada objeto.
 
 Podes usar métodos en la clase ejecutable, para que sea mas fácil.*/
@@ -47,25 +45,43 @@ Podes usar métodos en la clase ejecutable, para que sea mas fácil.*/
 namespace Test{
     class Ej12{
         static void Main(string[] args){
-            Persona pablo = new Persona();
-            Persona adrian = new Persona("Adrian",17,'M');
-            Persona paula = new Persona("Paula",16,'F',123456,50.0m,1.68m);
+            
+            try{
+                Console.Write("Nombre: ");
+                string? nombre = Console.ReadLine();
+                Console.Write("Edad: ");
+                byte edad = byte.Parse(Console.ReadLine());
+                Console.Write("Sexo: ");
+                char sexo = char.Parse(Console.ReadLine());
+                Console.Write("Peso: ");
+                decimal peso = decimal.Parse(Console.ReadLine());
+                Console.Write("Altura: ");
+                decimal altura = decimal.Parse(Console.ReadLine());
 
-            pablo.Mostrar();
-            adrian.Mostrar();
-            paula.Mostrar();
+                Persona usuario1 = new Persona(nombre,edad,sexo,peso,altura);
+                Persona usuario2 = new Persona(nombre,edad,sexo);
+                Persona usuario3 = new Persona("Agustin",18,'H',46648714,55.0m,170.0m);
+                
+                usuario1.Mostrar();
+                usuario2.Mostrar();
+                usuario3.Mostrar();
+            }
+            catch(Exception e){
+                Console.WriteLine($"Error: {e}");
+            }
         }
     }
-    //nombre, edad, DNI, sexo (H hombre, M mujer), peso y altura
+//nombre, Edad, Dni, Sexo (H hombre, M mujer), peso y altura
     public class Persona{
-        private string? nombre;
-        private int edad;
-        private int dni;
-        private char sexo = 'M';
+        private const char SEXO_DEFAULT = 'H';
+        private string? Nombre;
+        private byte Edad;
+        private string Dni;
+        private char Sexo;
         public decimal peso{
             get{return Peso;}
             set{
-                if(Peso >= 1)
+                if(Peso >= 0.0m)
                     Peso = value;
                 else
                     Console.WriteLine("Error: valor de peso invalido");
@@ -74,67 +90,112 @@ namespace Test{
         public decimal altura{
             get{return Altura;}
             set{
-                if(Altura >= 100)
+                if(Altura >= 0.0m)
                     Altura = value;
                 else
                     Console.WriteLine("Error: valor de altura invalido");
             }
         }
-
         private decimal Peso;
         private decimal Altura;
-        //○ Un constructor por defecto.
+//○ Un constructor por defecto.
         public Persona(){
-            const char sexoDefault = 'M';
-            this.sexo = sexoDefault;
+            this.Sexo = SEXO_DEFAULT;
+            this.Dni = generaDni();
         }
-        //○ Un constructor con el nombre, edad y sexo, el resto por defecto.
-        public Persona(string nombre, int edad, char sexo){
-            this.nombre = nombre;
-            this.edad = edad;
-            this.sexo = sexo;
+//○ Un constructor con el nombre, Edad y Sexo, el resto por defecto.
+        public Persona(string nombre, byte Edad, char Sexo){
+            this.Nombre = nombre;
+            this.Edad = Edad;
+            this.Sexo = Sexo;
+            this.Dni = generaDni();
         }
-        //○ Un constructor con todos los atributos como parámetro.
-        public Persona(string nombre, int edad, char sexo, int dni, decimal peso, decimal altura){
-            this.nombre = nombre;
-            this.edad = edad;
-            this.sexo = sexo;
-            this.dni = dni;
+//○ Un constructor con todos los atributos como parámetro.
+        public Persona(string nombre, byte edad, char sexo, int dni, decimal peso, decimal altura){
+            this.Nombre = nombre;
+            this.Edad = edad;
+            this.Sexo = sexo;
+            this.Dni = DniConLetra(dni);
             this.Peso = peso;
             this.Altura = altura;
         }
+        public Persona(string nombre, byte edad, char sexo, decimal peso, decimal altura){
+            this.Nombre = nombre;
+            this.Edad = edad;
+            this.Sexo = sexo;
+            this.Dni = generaDni();
+            this.Peso = peso;
+            this.altura = altura;
+        }
         public void Mostrar(){
+            //string PesoIdeal(int pesoIdeal) => pesoIdeal == -1 ? $"{Nombre} esta en su peso ideal" : pesoIdeal == 0 ? $"{Nombre} esta por debajo de su peso ideal" : $"{Nombre} tiene sobrepeso";
+            string PesoIdeal = calcularIMC() switch{
+                -1 => $"\n{Nombre} esta en su peso ideal",
+                0 => $"\n{Nombre} esta por debajo de su peso ideal",
+                1 => $"\n{Nombre} tiene sobrepeso",
+                2 => ""
+            };
+            string Genero(char genero) => genero == 'M' ? "Mujer" : "Hombre";
+
             Console.WriteLine("\n------------------------------");
-            Console.WriteLine("Nombre: "+nombre);
-            Console.WriteLine("Edad: "+edad);
-            Console.WriteLine("Sexo: "+sexo);
-            Console.WriteLine("DNI: "+dni);
+            Console.WriteLine("Nombre: "+Nombre);
+            Console.WriteLine("Edad: "+Edad);
+            Console.WriteLine("Sexo: "+Genero(Sexo));
+            Console.WriteLine("Dni: "+Dni);
             Console.WriteLine("Peso: "+Peso);
-            Console.WriteLine("Altura: "+Altura);
+            Console.Write("Altura: "+Altura);
+            Console.WriteLine($"{PesoIdeal}");
             Console.WriteLine("------------------------------\n");
         }
-        /*calcularIMC(): calculará si la persona está en su peso ideal (peso en
+/*calcularIMC(): calculará si la persona está en su peso ideal (peso en
 kg/(altura^2 en m)), si esta fórmula devuelve un valor menor que 20, la función
 devuelve un -1, si devuelve un número entre 20 y 25 (incluidos), significa que
 está por debajo de su peso ideal la función devuelve un 0 y si devuelve un valor
 mayor que 25 significa que tiene sobrepeso, la función devuelve un 1. Te
 recomiendo que uses constantes para devolver estos valores.*/
-        public bool calcularIMC(){
-            bool EsIdeal;
-            if((peso /= (altura*altura)) < 20)
+        public int calcularIMC(){
+            int EsIdeal = 2;
+            if(peso > 0 && altura > 0){
+                decimal result = peso / (altura*altura);
+                switch(result){
+                    case < 20:
+                        EsIdeal = -1;
+                        break;
+                    case >= 20 and <= 25:
+                        EsIdeal = 0;
+                        break;
+                    default:
+                        EsIdeal = 1;
+                        break;
+                }
+            }
             return EsIdeal;
         }
-        //■ esMayorDeEdad(): indica si es mayor de edad, devuelve un booleano.
-
-        public void esMayorDeEdad(){}
-        /*■ comprobarSexo(char sexo): comprueba que el sexo introducido es
+//■ esMayorDeEdad(): indica si es mayor de Edad, devuelve un booleano.
+        public bool esMayorDeEdad(){
+            bool esMayor = false;
+            if(Edad >= 18)
+                esMayor = true;
+            return esMayor;
+        }
+/*■ comprobarSexo(char Sexo): comprueba que el Sexo introducido es
 correcto. Si no es correcto, será H. No será visible al exterior.*/
-        public void comprobarSexo(){}
-/*■ generaDNI(): genera un número aleatorio de 8 cifras, genera a partir de
+        public void comprobarSexo(){
+            if(!(Sexo == 'M' || Sexo == 'H'))
+                Sexo = 'H';
+        }
+/*■ generaDni(): genera un número aleatorio de 8 cifras, genera a partir de
 este su número su letra correspondiente. Este método será invocado
 cuando se construya el objeto. Podes dividir el método para que te sea
-más fácil. No será visible al exterior ejemplo de DNI(12345678D).*/
-        public void generaDNI(){}
-
+más fácil. No será visible al exterior ejemplo de Dni(12345678D).*/
+        static public string generaDni(){
+            int rnd_Dni = new Random().Next(10000000,99999999);
+            return $"{DniConLetra(rnd_Dni)}";
+        }
+        static public string DniConLetra(int Dni){
+            string letras = "TRWAGMYFPDXBNJZSQVHLCKE";
+            char letra = letras[Dni%23];
+            return $"{Dni}{letra}";
+        }
     }
 }
