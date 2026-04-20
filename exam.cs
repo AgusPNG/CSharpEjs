@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace Test;
 
@@ -17,24 +16,33 @@ class Exam{
     }
 }
 class CuentaBancaria{
-    public string titular;
+    private string titular;
+    public string Titular{
+        get{return titular;}
+        set{
+            if(value != "")
+                titular = value;
+            else
+                Console.WriteLine("Ingresar bien el titular");
+        }
+    }
     private decimal saldo;
     public decimal Saldo{
         get{return saldo;}
         set{
-            if(value >= 0.0m){
+            if(value >= 0.0m)
                 saldo = value;
-            }
+            else
+                Console.WriteLine("El saldo debe ser positivo");
         }
     }
     public CuentaBancaria(string titular){
-        this.titular = titular;
+        this.Titular = titular;
         this.saldo = 0.0m;
     }
     public void Depositar(decimal monto){
-        if(saldo >= 0.0m){
+        if(saldo >= 0.0m)
             Saldo += monto;
-        }
     }
     
     public bool Retirar(decimal monto){
@@ -50,9 +58,8 @@ class CuentaBancaria{
             tranferirUsuario.Depositar(monto);
             Console.WriteLine($"Se transfirio {monto} a {tranferirUsuario.titular} desde la cuenta de {this.titular}");
         }
-        else{
+        else
             Console.WriteLine($"No se pudo resolver la transaccion, ingresar bien el monto");
-        }
 
     }
     public void Mostrar(){
