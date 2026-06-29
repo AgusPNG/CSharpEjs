@@ -199,12 +199,17 @@ public class Program{
         Hospital hospital = new Hospital("Hospital de Prueba","Av. Jujuy 789");
         hospital.PresentarInstitucion();
 
-        banco.AbrirCuenta(new CuentaBancaria{Titular="Juan Perez", Saldo=0}, 1000);
-        banco.AbrirCuenta(new CuentaBancaria{Titular="Maria Lopez", Saldo=0}, 500);
+        try{
+            banco.AbrirCuenta(new CuentaBancaria{Titular="Juan%Perez", Saldo=0}, 1000);
+            banco.AbrirCuenta(new CuentaBancaria{Titular="Maria Lopez", Saldo=0}, 500);
+            banco.cuentas[0].TransferirA(banco.cuentas[1], 200);
 
-        banco.cuentas[0].TransferirA(banco.cuentas[1], 200);
+            banco.cuentas[0].MostrarSaldo();
+            banco.cuentas[1].MostrarSaldo();
+        }
+        catch(ExamenException e){
+            Console.WriteLine("Error: "+e.Message);
+        }
 
-        banco.cuentas[0].MostrarSaldo();
-        banco.cuentas[1].MostrarSaldo();
     }
 }
